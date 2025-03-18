@@ -5,8 +5,10 @@ Base = declarative_base()
 
 class TranslationTask(Base):
     __tablename__ = "translation_task"
+    
     id = Column(Integer, primary_key=True, index=True)
     text = Column(Text, nullable=False)
     languages = Column(JSON, nullable=False)
     status = Column(String, default="in progress")
+    
     translation = Column(JSON, default={})
