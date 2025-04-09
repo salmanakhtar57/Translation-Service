@@ -57,26 +57,33 @@
   </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container">
-      <a class="navbar-brand mx-auto" href="#">Translator Service</a>
-      <div class="navbar-text text-light">
-        AlphaLoops TASK-Exercise
-      </div>
-    </div>
-  </nav>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand mx-auto" href="#">Translator Service</a>
+            <div class="navbar-text text-light">
+                AlphaLoops TASK-Exercise
+            </div>
+        </div>
+    </nav>
 
-  <div class="content">
-    <div class="container form-container">
-      <div class="form-box">
-        <label for="text" class="form-label">Text to Translate</label>
-        <textarea id="text" class="form-control" rows="10"></textarea>
-      </div>
-      <div class="form-box">
-        <label for="languages" class="form-label">Languages</label>
-        <input id="languages" class="form-control" type="text" placeholder="e.g., english, german, russian">
-        <small class="form-text text-muted">Write the languages you want to translate your text to, separated by commas.</small>
-      </div>
+    <div class="content">
+        <div class="container form-container">
+              <!-- Text to Translate -->
+        <div class="form-box">
+              <label for="text" class="form-label">Text to Translate</label>
+              <textarea id="text" class="form-control" rows="10"></textarea>
+          </div>
+          <div class="form-box">
+            <label for="languages" class="form-label">Languages</label>
+            <input id="languages" class="form-control" type="text" placeholder="e.g., english, german, russian">
+            <small class="form-text text-muted">Write the languages you want to translate your text to, separated by commas.</small>
+          </div>
+           <!-- Translation Task ID Input -->
+        <div class="form-box">
+          <label for="task_id" class="form-label">Translation Task ID</label>
+          <input id="task_id" class="form-control" type="text" placeholder="Enter translation ID to check status">
+        </div>
+
       <div class="btn-container">
         <button class="btn btn-primary" onclick="translateText()">Translate</button>
       </div>
@@ -91,12 +98,13 @@
     async function translateText() {
       // Extract the text and languages from the form
       var text_for_translation = document.getElementById('text').value;
-      var languages_chosen = document.getElementById('languages').value;
+      var languages_chosen = document.getElementById('languages').value.trim();
+      var language_array = languages_chosen ? languages_chosen.split(',').map(lang => lang.trim()) : [];
 
       // Prepare the payload
       var payload = {
         text: text_for_translation,
-        languages: languages_chosen
+        language: language_array
       };
 
       try {
@@ -121,6 +129,34 @@
       } catch (error) {
         console.error('Error:', error);
         alert('Failed to submit translation request.');
+      }
+    }
+    async function checkTranslationStatus() {
+      var task_id = document.getElementById('task_id').value.trim();
+
+      if (!task_id) {
+        alert('Please enter a valid translation task ID.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:8000/translate/${task_id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        alert('Task Status: ' + result.status);
+        console.log(result);  // Log for debugging
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to check translation status.');
       }
     }
   </script>
